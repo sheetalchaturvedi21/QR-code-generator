@@ -7,6 +7,7 @@ import QRPreview from './components/QRPreview';
 import ReliabilityWarnings from './components/ReliabilityWarnings';
 import RecentQRs from './components/RecentQRs';
 import Toast from './components/Toast';
+import IntroAnimation from './components/IntroAnimation';
 
 import { formatQRData } from './utils/qrcodeFormatter';
 import { validateInputs, isValidForm } from './utils/validators';
@@ -39,8 +40,21 @@ const getInitialTheme = () => {
   return 'light';
 };
 
+const checkShowIntro = () => {
+  try {
+    if (typeof window !== 'undefined') {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return false;
+      }
+      return sessionStorage.getItem('qr_intro_seen') !== 'true';
+    }
+  } catch (e) {}
+  return false;
+};
+
 export default function App() {
   const [theme, setTheme] = useState(getInitialTheme);
+  const [showIntro, setShowIntro] = useState(checkShowIntro);
   const [activeType, setActiveType] = useState('url');
   const [formData, setFormData] = useState(DEFAULT_FORM_DATA);
   const [touched, setTouched] = useState({});
@@ -137,6 +151,8 @@ export default function App() {
 
   return (
     <div className="app-root" data-theme={theme}>
+      {showIntro && <IntroAnimation onFinish={() => setShowIntro(false)} />}
+
       <div className="app-container">
         <Header theme={theme} onToggleTheme={toggleTheme} />
 
