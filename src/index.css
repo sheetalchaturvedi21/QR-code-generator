@@ -357,6 +357,60 @@ body {
   margin-top: 6px;
 }
 
+/* Custom preset row */
+.custom-preset-row {
+  margin-top: 6px;
+}
+
+.custom-preset-name-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.custom-preset-name-input {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+}
+
+.custom-preset-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.custom-preset-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-base);
+  padding: 2px 6px;
+  color: var(--text-sub);
+}
+
+.chip-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.chip-delete {
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0 2px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
 /* Custom Colours Picker */
 .color-picker-group {
   display: flex;

@@ -141,8 +141,10 @@ test('validateInputs - Phone digit boundaries (6 vs 7 vs 15 vs 16)', () => {
   assert.equal(validateInputs('phone', { phone: '123456' }).phone, 'Phone number must contain at least 7 digits');
   // 7 digits -> Valid
   assert.equal(isValidForm(validateInputs('phone', { phone: '1234567' })), true);
-  // 15 digits -> Valid
-  assert.equal(isValidForm(validateInputs('phone', { phone: '+123456789012345' })), true);
+  // 15 digits -> Valid (E.164 max)
+  assert.equal(isValidForm(validateInputs('phone', { phone: '123456789012345' })), true);
+  // 16 digits -> Invalid
+  assert.ok(validateInputs('phone', { phone: '1234567890123456' }).phone.includes('15 digits'));
   // Phone containing letters -> Invalid
   assert.equal(validateInputs('phone', { phone: '1234567a' }).phone, 'Phone number cannot contain letters');
 });
@@ -155,6 +157,13 @@ test('validateInputs - WPA Password boundaries (7 vs 8 vs 63 vs 64)', () => {
   // 63 & 64 chars -> Valid
   assert.equal(isValidForm(validateInputs('wifi', { ssid: 'Net', security: 'WPA', password: 'x'.repeat(63) })), true);
   assert.equal(isValidForm(validateInputs('wifi', { ssid: 'Net', security: 'WPA', password: 'x'.repeat(64) })), true);
+});
+
+test('validateInputs - WEP Password boundary (4 vs 5 chars)', () => {
+  // 4 chars -> Invalid for WEP
+  assert.equal(validateInputs('wifi', { ssid: 'Net', security: 'WEP', password: '1234' }).password, 'WEP password must be at least 5 characters');
+  // 5 chars -> Valid
+  assert.equal(isValidForm(validateInputs('wifi', { ssid: 'Net', security: 'WEP', password: '12345' })), true);
 });
 
 // ==========================================

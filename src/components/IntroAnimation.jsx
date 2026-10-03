@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const LINE_1 = "Welcome to QR Code Generator";
 const LINE_2 = "Make a QR code, style it, download it.";
@@ -17,17 +17,18 @@ export default function IntroAnimation({ onFinish }) {
     onFinishRef.current = onFinish;
   });
 
-  const addTimer = (id) => {
-    timersRef.current.push(id);
-  };
+  // Incremented each time the effect runs. Interval callbacks compare against
+  // this value so that a StrictMode double-invocation drops the first run's
+  // callbacks, preventing doubled typed text.
+  const runKeyRef = useRef(0);
 
-  const clearAllTimers = () => {
+  const clearAllTimers = useCallback(() => {
     timersRef.current.forEach((t) => {
       clearTimeout(t);
       clearInterval(t);
     });
     timersRef.current = [];
-  };
+  }, []);
 
   const finishIntro = useCallback(() => {
     if (hasFinishedRef.current) return;
@@ -42,8 +43,8 @@ export default function IntroAnimation({ onFinish }) {
     const fadeTimer = setTimeout(() => {
       onFinishRef.current();
     }, 500);
-    addTimer(fadeTimer);
-  }, []);
+    timersRef.current.push(fadeTimer);
+  }, [clearAllTimers]);
 
   useEffect(() => {
     // 1. Check prefers-reduced-motion
@@ -61,21 +62,35 @@ export default function IntroAnimation({ onFinish }) {
       return;
     }
 
-    // Reset state at start of effect to prevent React StrictMode double-run overlap
-    setText1('');
-    setText2('');
-    setIsTyping1(true);
-    setIsTyping2(false);
-    setIsFading(false);
+    // Capture the run key for this invocation. When StrictMode double-fires
+    // the effect, cleanup increments runKeyRef so the first run's interval/
+    // timeout callbacks see a stale key and exit immediately — no doubled text.
+    runKeyRef.current += 1;
+    const myKey = runKeyRef.current;
+
+    clearAllTimers();
     hasFinishedRef.current = false;
 
-    // 2. Add event listeners for instant skip
+    // Reset typing state for the new run.
+    // oxlint-disable-next-line react/set-state-in-effect -- intentional animation reset, guarded by runKey
+    setText1('');
+    // oxlint-disable-next-line react/set-state-in-effect
+    setText2('');
+    // oxlint-disable-next-line react/set-state-in-effect
+    setIsTyping1(true);
+    // oxlint-disable-next-line react/set-state-in-effect
+    setIsTyping2(false);
+    // oxlint-disable-next-line react/set-state-in-effect
+    setIsFading(false);
+
+    // 2. Add event listener for instant skip
     const handleKeyDown = () => finishIntro();
     window.addEventListener('keydown', handleKeyDown);
 
     // 3. Type Line 1
     let idx1 = 0;
     const interval1 = setInterval(() => {
+      if (runKeyRef.current !== myKey) { clearInterval(interval1); return; }
       idx1++;
       setText1(LINE_1.substring(0, idx1));
       if (idx1 >= LINE_1.length) {
@@ -84,9 +99,11 @@ export default function IntroAnimation({ onFinish }) {
 
         // Wait ~0.8s then start Line 2
         const t1 = setTimeout(() => {
+          if (runKeyRef.current !== myKey) return;
           setIsTyping2(true);
           let idx2 = 0;
           const interval2 = setInterval(() => {
+            if (runKeyRef.current !== myKey) { clearInterval(interval2); return; }
             idx2++;
             setText2(LINE_2.substring(0, idx2));
             if (idx2 >= LINE_2.length) {
@@ -95,6 +112,7 @@ export default function IntroAnimation({ onFinish }) {
 
               // Wait ~1.0s then fade out
               const t2 = setTimeout(() => {
+                if (runKeyRef.current !== myKey) return;
                 finishIntro();
               }, 1000);
               timersRef.current.push(t2);
@@ -109,10 +127,11 @@ export default function IntroAnimation({ onFinish }) {
     timersRef.current.push(interval1);
 
     return () => {
+      runKeyRef.current += 1;
       clearAllTimers();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [finishIntro]);
+  }, [finishIntro, clearAllTimers]);
 
   return (
     <div

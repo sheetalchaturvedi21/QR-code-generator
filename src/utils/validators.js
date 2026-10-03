@@ -63,6 +63,8 @@ export function validateInputs(type, data) {
         const digitsOnly = phone.replace(/\D/g, '');
         if (digitsOnly.length < 7) {
           errors.phone = 'Phone number must contain at least 7 digits';
+        } else if (digitsOnly.length > 15) {
+          errors.phone = 'Phone number must be 15 digits or fewer (E.164)';
         }
       }
       break;
@@ -77,11 +79,17 @@ export function validateInputs(type, data) {
         errors.ssid = 'Wi-Fi network name (SSID) is required';
       }
 
-      if (security !== 'none') {
+      if (security === 'WPA') {
         if (!password) {
           errors.password = 'Password is required for secured network';
         } else if (password.length < 8) {
           errors.password = 'WPA/WPA2 password must be at least 8 characters';
+        }
+      } else if (security === 'WEP') {
+        if (!password) {
+          errors.password = 'Password is required for secured network';
+        } else if (password.length < 5) {
+          errors.password = 'WEP password must be at least 5 characters';
         }
       }
       break;
