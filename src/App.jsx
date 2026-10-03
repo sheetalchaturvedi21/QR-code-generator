@@ -48,7 +48,7 @@ const checkShowIntro = () => {
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return false;
       }
-      return localStorage.getItem('qr_intro_seen') !== 'true' && sessionStorage.getItem('qr_intro_seen') !== 'true';
+      return sessionStorage.getItem('qr_intro_seen') !== 'true';
     }
   } catch {
     // Ignore storage errors

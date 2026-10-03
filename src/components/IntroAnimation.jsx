@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const LINE_1 = "Welcome to QR Code Generator";
 const LINE_2 = "Make a QR code, style it, download it.";
@@ -12,6 +12,10 @@ export default function IntroAnimation({ onFinish }) {
 
   const timersRef = useRef([]);
   const hasFinishedRef = useRef(false);
+  const onFinishRef = useRef(onFinish);
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+  });
 
   const addTimer = (id) => {
     timersRef.current.push(id);
@@ -36,10 +40,10 @@ export default function IntroAnimation({ onFinish }) {
     }
     setIsFading(true);
     const fadeTimer = setTimeout(() => {
-      onFinish();
+      onFinishRef.current();
     }, 500);
     addTimer(fadeTimer);
-  }, [onFinish]);
+  }, []);
 
   useEffect(() => {
     // 1. Check prefers-reduced-motion
@@ -53,9 +57,17 @@ export default function IntroAnimation({ onFinish }) {
       } catch {
         // Ignore storage error
       }
-      onFinish();
+      onFinishRef.current();
       return;
     }
+
+    // Reset state at start of effect to prevent React StrictMode double-run overlap
+    setText1('');
+    setText2('');
+    setIsTyping1(true);
+    setIsTyping2(false);
+    setIsFading(false);
+    hasFinishedRef.current = false;
 
     // 2. Add event listeners for instant skip
     const handleKeyDown = () => finishIntro();
@@ -85,22 +97,22 @@ export default function IntroAnimation({ onFinish }) {
               const t2 = setTimeout(() => {
                 finishIntro();
               }, 1000);
-              addTimer(t2);
+              timersRef.current.push(t2);
             }
           }, 60);
-          addTimer(interval2);
+          timersRef.current.push(interval2);
         }, 800);
-        addTimer(t1);
+        timersRef.current.push(t1);
       }
     }, 60);
 
-    addTimer(interval1);
+    timersRef.current.push(interval1);
 
     return () => {
       clearAllTimers();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [finishIntro, onFinish]);
+  }, [finishIntro]);
 
   return (
     <div
