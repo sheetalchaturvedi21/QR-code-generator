@@ -4,10 +4,6 @@ A QR code generator I built with React and Vite. It runs fully in the browser, w
 
 Live demo: https://qr-code-generator-one-ivory.vercel.app
 
-## Screenshot
-
-![screenshot](screenshot.png)
-
 ## Features
 
 - 5 QR types: URL, Text, Email, Phone, and Wi-Fi
