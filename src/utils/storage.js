@@ -9,9 +9,10 @@ export function getRecentQRs() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
-    return JSON.parse(raw);
-  } catch (e) {
-    console.error('Failed to read recent QRs from localStorage', e);
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed;
+  } catch {
     return [];
   }
 }
@@ -30,8 +31,7 @@ export function saveRecentQR(item) {
     const updated = [newItem, ...filtered].slice(0, MAX_ITEMS);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     return updated;
-  } catch (e) {
-    console.error('Failed to save QR to localStorage', e);
+  } catch {
     return getRecentQRs();
   }
 }
@@ -42,8 +42,7 @@ export function deleteRecentQR(id) {
     const updated = list.filter(item => item.id !== id);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     return updated;
-  } catch (e) {
-    console.error('Failed to delete QR from localStorage', e);
+  } catch {
     return getRecentQRs();
   }
 }
@@ -52,8 +51,7 @@ export function clearAllRecentQRs() {
   try {
     localStorage.removeItem(STORAGE_KEY);
     return [];
-  } catch (e) {
-    console.error('Failed to clear recent QRs', e);
+  } catch {
     return [];
   }
 }

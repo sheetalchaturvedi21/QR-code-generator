@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const LINE_1 = "Welcome to QR Code Generator";
 const LINE_2 = "Make a QR code, style it, download it.";
@@ -25,19 +25,21 @@ export default function IntroAnimation({ onFinish }) {
     timersRef.current = [];
   };
 
-  const finishIntro = () => {
+  const finishIntro = useCallback(() => {
     if (hasFinishedRef.current) return;
     hasFinishedRef.current = true;
     clearAllTimers();
     try {
       sessionStorage.setItem('qr_intro_seen', 'true');
-    } catch (e) {}
+    } catch {
+      // Ignore storage error
+    }
     setIsFading(true);
     const fadeTimer = setTimeout(() => {
       onFinish();
     }, 500);
     addTimer(fadeTimer);
-  };
+  }, [onFinish]);
 
   useEffect(() => {
     // 1. Check prefers-reduced-motion
@@ -48,7 +50,9 @@ export default function IntroAnimation({ onFinish }) {
     ) {
       try {
         sessionStorage.setItem('qr_intro_seen', 'true');
-      } catch (e) {}
+      } catch {
+        // Ignore storage error
+      }
       onFinish();
       return;
     }
@@ -96,7 +100,7 @@ export default function IntroAnimation({ onFinish }) {
       clearAllTimers();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []);
+  }, [finishIntro, onFinish]);
 
   return (
     <div

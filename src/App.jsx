@@ -9,9 +9,9 @@ import RecentQRs from './components/RecentQRs';
 import Toast from './components/Toast';
 import IntroAnimation from './components/IntroAnimation';
 
-import { formatQRData } from './utils/qrcodeFormatter';
-import { validateInputs, isValidForm } from './utils/validators';
-import { getRecentQRs, saveRecentQR, deleteRecentQR, clearAllRecentQRs } from './utils/storage';
+import { formatQRData } from './utils/qrcodeFormatter.js';
+import { validateInputs, isValidForm } from './utils/validators.js';
+import { getRecentQRs, saveRecentQR, deleteRecentQR, clearAllRecentQRs } from './utils/storage.js';
 
 const DEFAULT_FORM_DATA = {
   url: { url: 'https://example.com' },
@@ -33,7 +33,9 @@ const getInitialTheme = () => {
   try {
     const saved = localStorage.getItem('qr_theme');
     if (saved === 'light' || saved === 'dark') return saved;
-  } catch (e) {}
+  } catch {
+    // Ignore storage errors
+  }
   if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
     return 'dark';
   }
@@ -46,9 +48,11 @@ const checkShowIntro = () => {
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         return false;
       }
-      return sessionStorage.getItem('qr_intro_seen') !== 'true';
+      return localStorage.getItem('qr_intro_seen') !== 'true' && sessionStorage.getItem('qr_intro_seen') !== 'true';
     }
-  } catch (e) {}
+  } catch {
+    // Ignore storage errors
+  }
   return false;
 };
 
@@ -62,28 +66,26 @@ export default function App() {
 
   const [qrError, setQrError] = useState(null);
   const [lastGeneratedDataUrl, setLastGeneratedDataUrl] = useState(null);
-  const [recentList, setRecentList] = useState([]);
+  const [recentList, setRecentList] = useState(getRecentQRs);
   const [toast, setToast] = useState({ message: '', type: 'info' });
 
   const debounceTimerRef = useRef(null);
-
-  useEffect(() => {
-    setRecentList(getRecentQRs());
-  }, []);
 
   const toggleTheme = () => {
     setTheme((prev) => {
       const next = prev === 'light' ? 'dark' : 'light';
       try {
         localStorage.setItem('qr_theme', next);
-      } catch (e) {}
+      } catch {
+        // Ignore storage errors
+      }
       return next;
     });
   };
 
-  const currentInputData = formData[activeType] || {};
-  const errors = useMemo(() => validateInputs(activeType, currentInputData), [activeType, currentInputData]);
-  const formattedData = useMemo(() => formatQRData(activeType, currentInputData), [activeType, currentInputData]);
+  const activeData = formData[activeType];
+  const errors = useMemo(() => validateInputs(activeType, activeData), [activeType, activeData]);
+  const formattedData = useMemo(() => formatQRData(activeType, activeData), [activeType, activeData]);
   const isValid = useMemo(() => isValidForm(errors), [errors]);
 
   const showToast = useCallback((message, type = 'info') => {
@@ -108,7 +110,7 @@ export default function App() {
       const updated = saveRecentQR({
         type: activeType,
         formattedData,
-        rawInputs: currentInputData,
+        rawInputs: activeData,
         options,
         dataUrl: lastGeneratedDataUrl
       });
@@ -120,7 +122,7 @@ export default function App() {
         clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [activeType, formattedData, isValid, lastGeneratedDataUrl, options, currentInputData]);
+  }, [activeType, formattedData, isValid, lastGeneratedDataUrl, options, activeData]);
 
   const handleLoadRecent = (item) => {
     setActiveType(item.type);

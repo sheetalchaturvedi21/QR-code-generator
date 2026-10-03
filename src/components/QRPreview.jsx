@@ -11,19 +11,14 @@ export default function QRPreview({
   showToast
 }) {
   const canvasRef = useRef(null);
-  const [isRendering, setIsRendering] = useState(false);
   const [renderError, setRenderError] = useState(null);
 
   useEffect(() => {
     let isMounted = true;
     
     if (!isValid || !formattedData) {
-      setRenderError(null);
-      onQRError(null);
       return;
     }
-
-    setIsRendering(true);
 
     const qrOpts = {
       width: options.size,
@@ -37,7 +32,6 @@ export default function QRPreview({
 
     QRCode.toCanvas(canvasRef.current, formattedData, qrOpts, (err) => {
       if (!isMounted) return;
-      setIsRendering(false);
       
       if (err) {
         setRenderError(err.message || 'Error generating QR code');
@@ -55,7 +49,7 @@ export default function QRPreview({
     return () => {
       isMounted = false;
     };
-  }, [formattedData, isValid, options.size, options.margin, options.fgColor, options.bgColor, options.ecc]);
+  }, [formattedData, isValid, options.size, options.margin, options.fgColor, options.bgColor, options.ecc, onQRError, onGeneratedSuccess]);
 
   const handleDownloadPNG = () => {
     if (!isValid || renderError || !canvasRef.current) return;
@@ -70,7 +64,7 @@ export default function QRPreview({
       link.click();
       document.body.removeChild(link);
       showToast('PNG downloaded!', 'success');
-    } catch (e) {
+    } catch {
       showToast('Failed to download PNG', 'error');
     }
   };
@@ -106,7 +100,7 @@ export default function QRPreview({
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
         showToast('SVG downloaded!', 'success');
-      } catch (e) {
+      } catch {
         showToast('Download SVG failed', 'error');
       }
     });
@@ -129,14 +123,16 @@ export default function QRPreview({
             new ClipboardItem({ 'image/png': blob })
           ]);
           showToast('Image copied to clipboard', 'info');
-        } catch (err) {
+        } catch {
           showToast('Clipboard permission blocked by browser', 'error');
         }
       });
-    } catch (e) {
+    } catch {
       showToast('Could not copy image to clipboard', 'error');
     }
   };
+
+  const isShowError = isValid && !!formattedData && renderError;
 
   return (
     <div className="preview-container">
@@ -145,7 +141,7 @@ export default function QRPreview({
           ref={canvasRef}
           aria-label="QR Code preview"
           role="img"
-          className={`qr-canvas-direct ${!isValid || renderError ? 'canvas-hidden' : ''}`}
+          className={`qr-canvas-direct ${!isValid || isShowError ? 'canvas-hidden' : ''}`}
           style={{ maxWidth: '100%', height: 'auto' }}
         />
 
@@ -155,7 +151,7 @@ export default function QRPreview({
           </div>
         )}
 
-        {renderError && (
+        {isShowError && (
           <div className="canvas-error">
             <p className="error-title">Could not render QR code</p>
             <p className="error-detail">{renderError}</p>

@@ -19,10 +19,13 @@ export function validateInputs(type, data) {
         const fullUrl = /^https?:\/\//i.test(url) ? url : 'https://' + url;
         try {
           const parsed = new URL(fullUrl);
-          if (!parsed.hostname || !parsed.hostname.includes('.')) {
+          const hostname = parsed.hostname;
+          const isLocalhost = hostname === 'localhost' || /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+          
+          if (!hostname || (!hostname.includes('.') && !isLocalhost)) {
             errors.url = 'Please enter a valid web domain or URL (e.g. example.com)';
           }
-        } catch (e) {
+        } catch {
           errors.url = 'Please enter a valid web domain or URL (e.g. example.com)';
         }
       }

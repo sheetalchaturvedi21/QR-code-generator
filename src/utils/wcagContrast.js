@@ -3,10 +3,12 @@
  */
 
 function hexToRgb(hex) {
+  if (!hex || typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
   let c = hex.replace('#', '').trim();
   if (c.length === 3) {
     c = c.split('').map(x => x + x).join('');
   }
+  if (c.length !== 6) return { r: 0, g: 0, b: 0 };
   const num = parseInt(c, 16);
   if (isNaN(num)) return { r: 0, g: 0, b: 0 };
   return {
