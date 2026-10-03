@@ -1,59 +1,59 @@
 # QR Code Generator
 
-A lightweight, high-performance, browser-based QR Code Generator and Designer built with React, Vite, Plain JavaScript, and Vanilla CSS. Operates 100% client-side with zero backend dependencies.
+A QR code generator I built with React and Vite. It runs fully in the browser, with no backend.
 
----
+Live demo: https://qr-code-generator-one-ivory.vercel.app
 
-## 🚀 Features
+## Screenshot
 
-- **5 QR Types**: Website URL (auto `https://`), Plain Text, Email (`mailto:` with subject & body), Phone (`tel:` with clean digits), and Wi-Fi (`WIFI:T:...;S:...;P:...;H:...;;` with special character escaping).
-- **Validation**: Real-time validation with field-level touched state tracking. Displays clear error notices below fields and disables export buttons while inputs are invalid.
-- **Customization & Presets**: Custom size (128-512px), quiet zone margin (0-10 modules), Error Correction Levels (L, M, Q, H), color pickers, and 6 preset color dots.
-- **Scan Reliability Engine**: Real-time WCAG contrast ratio calculation, inverted color check, margin/size legibility warnings, and data overflow detection.
-- **Exports**: Pixel-matched PNG export, vector SVG download, and direct image copying to clipboard.
-- **Recent History**: 1.5-second debounced `localStorage` saving last 10 designs with thumbnail previews (Wi-Fi passwords hidden).
-- **Accessibility & Themes**: Light & Dark mode supporting system preference, keyboard tab navigation, and `aria-label` tags.
+![screenshot](screenshot.png)
 
----
+## Features
 
-## 💻 Local Development
+- 5 QR types: URL, Text, Email, Phone, and Wi-Fi
+- Live preview that updates as you type or change settings
+- Custom colour, size, margin, and error correction settings
+- 6 colour presets
+- Download as PNG or SVG
+- Copy QR image directly to clipboard
+- Input validation with clear error messages under fields
+- Scan reliability warnings for contrast, size, margin, and data length
+- Recent QR codes saved in localStorage
+- Dark and light theme toggle
+- Welcome intro typing animation
 
-### Installation
+## Tech used
+
+- React
+- Vite
+- qrcode library
+- Plain CSS
+
+## Run it locally
+
+Install dependencies:
 ```bash
 npm install
 ```
 
-### Run Local Dev Server
+Start the dev server:
 ```bash
 npm run dev
 ```
-Open `http://localhost:5173` in your browser.
 
-### Run Unit Tests
+## Tests
+
+Run the test suite:
 ```bash
 npm test
 ```
-Executes Node.js test runner covering formatting, Wi-Fi character escaping, validation rules, WCAG contrast calculations, and diagnostics warnings.
 
-### Production Build
-```bash
-npm run build
-```
-Generates static assets in the `dist/` directory.
+## Deployment
 
----
+Deployed on Vercel from this GitHub repository using the build command `npm run build` and output directory `dist`.
 
-## 🌐 Deployment Instructions
+## What I'd add next
 
-### Deploy to Vercel
-1. Push repository to GitHub/GitLab.
-2. Import project into Vercel dashboard.
-3. Vercel automatically detects the **Vite** framework preset.
-4. Click **Deploy**.
-
-### Deploy to Netlify
-1. Connect your repository to Netlify.
-2. Configure build settings:
-   - **Build command**: `npm run build`
-   - **Publish directory**: `dist`
-3. Click **Deploy site**.
+- Logo in the centre of the QR code
+- Gradient QR codes
+- Custom dot patterns
